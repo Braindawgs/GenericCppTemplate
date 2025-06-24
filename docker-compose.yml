@@ -1,9 +1,25 @@
-version: "3.8"
 services:
   dev:
     build:
       context: .
       dockerfile: Dockerfile
+      target: dev
     volumes:
-      - .:/workspaces/GenericCppTemplate
+      - .:/app  
+      - dev-build-cache:/app/build
     command: sleep infinity
+    tty: true
+
+  runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner        
+    image: mycppapp:prod    
+    command: ./GenericCppTemplate        
+    restart: unless-stopped
+    depends_on:
+      - dev                 
+
+volumes:
+  dev-build-cache:

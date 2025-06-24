@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+## Stage 1: Build
+FROM ubuntu:22.04 AS dev
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -24,3 +25,20 @@ RUN chsh -s $(which zsh) root
 WORKDIR /app
 
 CMD ["zsh"]
+
+## Stage 2: Builder
+FROM dev AS builder
+
+WORKDIR /app
+COPY . .
+
+RUN cmake -S . -B build && cmake --build build
+
+## Stage 3: Runner
+
+FROM ubuntu:22.04 AS runner
+
+WORKDIR /app
+COPY --from=builder /app/build/GenericCppTemplate .
+
+CMD ["./GenericCppTemplate"]
